@@ -1,0 +1,6 @@
+exports_files([
+    "hwy_bazel_includes.patch",
+    "libspng.BUILD",
+    "libtiff.BUILD",
+    "lodepng.BUILD",
+])

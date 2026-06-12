@@ -1,0 +1,192 @@
+# Doxyfile for fimage
+# Optional standalone Doxygen configuration
+# For Bazel builds, use: bazelisk build //aifo/fimage/docs:doxygen_build
+
+#---------------------------------------------------------------------------
+# Project related configuration options
+#---------------------------------------------------------------------------
+
+DOXYFILE_ENCODING      = UTF-8
+PROJECT_NAME           = "fimage"
+PROJECT_BRIEF          = "Tile-based image processing with CRTP"
+PROJECT_NUMBER         = 0.1.2
+OUTPUT_DIRECTORY       = build/doxygen
+CREATE_SUBDIRS         = NO
+OUTPUT_LANGUAGE        = English
+
+#---------------------------------------------------------------------------
+# Build related configuration options
+#---------------------------------------------------------------------------
+
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = YES
+EXTRACT_PACKAGE        = YES
+EXTRACT_STATIC         = YES
+EXTRACT_PRIV_VIRTUAL   = YES
+HIDE_UNDOC_MEMBERS     = NO
+HIDE_UNDOC_CLASSES     = NO
+BRIEF_MEMBER_DESC      = YES
+REPEAT_BRIEF           = YES
+JAVADOC_AUTOBRIEF      = YES
+MULTILINE_CPP_IS_BRIEF = NO
+INHERIT_DOCS           = YES
+INLINE_INHERITED_MEMB  = NO
+SEPARATE_MEMBER_PAGES  = NO
+TAB_SIZE               = 4
+OPTIMIZE_OUTPUT_FOR_C  = NO
+OPTIMIZE_OUTPUT_JAVA   = NO
+BUILTIN_STL_SUPPORT    = YES
+DISTRIBUTE_GROUP_DOC   = NO
+GROUP_NESTED_COMPOUNDS = NO
+SUBGROUPING            = YES
+INLINE_SIMPLE_STRUCTS  = NO
+
+#---------------------------------------------------------------------------
+# Input related options
+#---------------------------------------------------------------------------
+
+INPUT                  = ../include/fim
+FILE_PATTERNS          = *.h \
+                         *.hpp \
+                         *.cpp
+RECURSIVE              = YES
+EXCLUDE                = 
+EXCLUDE_SYMLINKS       = NO
+EXCLUDE_PATTERNS       = */test/* \
+                         */*_test.* \
+                         */build/*
+EXAMPLE_PATH           = ../examples
+EXAMPLE_PATTERNS       = *.cpp \
+                         *.py
+EXAMPLE_RECURSIVE      = YES
+IMAGE_PATH             = 
+
+#---------------------------------------------------------------------------
+# Source browsing options
+#---------------------------------------------------------------------------
+
+SOURCE_BROWSER         = YES
+INLINE_SOURCES         = NO
+STRIP_CODE_COMMENTS    = YES
+REFERENCED_BY_RELATION = YES
+REFERENCES_RELATION    = YES
+USE_HTAGS              = NO
+VERBATIM_HEADERS       = YES
+CLANG_ASSISTED_PARSING = NO
+
+#---------------------------------------------------------------------------
+# Alphabetical class index options
+#---------------------------------------------------------------------------
+
+ALPHABETICAL_INDEX     = YES
+COLS_IN_ALPHA_INDEX    = 5
+
+#---------------------------------------------------------------------------
+# HTML output options
+#---------------------------------------------------------------------------
+
+GENERATE_HTML          = YES
+HTML_OUTPUT            = html
+HTML_FILE_EXTENSION    = .html
+HTML_HEADER            = 
+HTML_FOOTER            = 
+HTML_STYLESHEET        = 
+HTML_EXTRA_STYLESHEET  = 
+HTML_EXTRA_FILES       = 
+HTML_COLORSTYLE_HUE    = 220
+HTML_COLORSTYLE_SAT    = 100
+HTML_COLORSTYLE_GAMMA  = 80
+HTML_TIMESTAMP         = YES
+HTML_DYNAMIC_SECTIONS  = YES
+HTML_INDEX_NUM_ENTRIES = 100
+GENERATE_DOCSET        = NO
+GENERATE_HTMLHELP      = NO
+GENERATE_QHP           = NO
+GENERATE_ECLIPSEHELP   = NO
+DISABLE_INDEX          = NO
+GENERATE_TREEVIEW      = YES
+ENUM_VALUES_PER_LINE   = 4
+TREEVIEW_WIDTH         = 250
+EXT_LINKS_IN_WINDOW    = NO
+FORMULA_FONTSIZE       = 10
+SEARCHENGINE           = YES
+SERVER_BASED_SEARCH    = NO
+
+#---------------------------------------------------------------------------
+# LaTeX output options
+#---------------------------------------------------------------------------
+
+GENERATE_LATEX         = NO
+
+#---------------------------------------------------------------------------
+# XML output options
+#---------------------------------------------------------------------------
+
+GENERATE_XML           = YES
+XML_OUTPUT             = xml
+XML_PROGRAMLISTING     = YES
+
+#---------------------------------------------------------------------------
+# Preprocessor options
+#---------------------------------------------------------------------------
+
+ENABLE_PREPROCESSING   = YES
+MACRO_EXPANSION        = YES
+EXPAND_ONLY_PREDEF     = NO
+SEARCH_INCLUDES        = YES
+INCLUDE_PATH           = ../include
+INCLUDE_FILE_PATTERNS  = 
+PREDEFINED             = __cplusplus=202002L \
+                         __restrict= \
+                         __restrict__=
+EXPAND_AS_DEFINED      = 
+SKIP_FUNCTION_MACROS   = YES
+
+#---------------------------------------------------------------------------
+# Diagram generator options
+#---------------------------------------------------------------------------
+
+HAVE_DOT               = YES
+DOT_NUM_THREADS        = 0
+DOT_FONTNAME           = Helvetica
+DOT_FONTSIZE           = 10
+CLASS_GRAPH            = YES
+COLLABORATION_GRAPH    = YES
+GROUP_GRAPHS           = YES
+UML_LOOK               = NO
+TEMPLATE_RELATIONS     = YES
+INCLUDE_GRAPH          = YES
+INCLUDED_BY_GRAPH      = YES
+CALL_GRAPH             = NO
+CALLER_GRAPH           = NO
+GRAPHICAL_HIERARCHY    = YES
+DIRECTORY_GRAPH        = YES
+DOT_IMAGE_FORMAT       = svg
+INTERACTIVE_SVG        = YES
+DOT_PATH               = 
+DOTFILE_DIRS           = 
+DOT_GRAPH_MAX_NODES    = 50
+MAX_DOT_GRAPH_DEPTH    = 0
+DOT_TRANSPARENT        = NO
+DOT_MULTI_TARGETS      = YES
+GENERATE_LEGEND        = YES
+DOT_CLEANUP            = YES
+
+#---------------------------------------------------------------------------
+# Other options
+#---------------------------------------------------------------------------
+
+QUIET                  = YES
+WARNINGS               = YES
+WARN_IF_UNDOCUMENTED   = NO
+WARN_IF_DOC_ERROR      = YES
+WARN_NO_PARAMDOC       = NO
+WARN_FORMAT            = "$file:$line: $text"
+WARN_LOGFILE           = 
+
+GENERATE_AUTOGEN_DEF   = NO
+GENERATE_PERLMOD       = NO
+GENERATE_RTF           = NO
+GENERATE_MAN           = NO
+GENERATE_DOCBOOK       = NO
+

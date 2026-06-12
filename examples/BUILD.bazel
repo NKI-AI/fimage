@@ -1,0 +1,65 @@
+load("@aspect_rules_py//py:defs.bzl", "py_binary")
+load("@fimage_pip//:requirements.bzl", "requirement")
+load("@rules_cc//cc:defs.bzl", "cc_binary")
+
+cc_binary(
+    name = "demo",
+    srcs = ["demo.cpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//:fimage",
+        "@cli11//:cli11",
+    ],
+)
+
+cc_binary(
+    name = "checkerboard_demo",
+    srcs = ["checkerboard_demo.cpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//:fimage",
+        "@aifocore-cpp//:thread_pool_singleton",
+        "@cli11//:cli11",
+    ],
+)
+
+cc_binary(
+    name = "fastslide_demo",
+    srcs = ["fastslide_demo.cpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//:fimage",
+        "@cli11//:cli11",
+    ],
+)
+
+cc_binary(
+    name = "cpp_paste_example",
+    srcs = ["cpp_paste_example.cpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//:fimage",
+    ],
+)
+
+py_binary(
+    name = "python_resize_example",
+    srcs = ["python_resize_example.py"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//python:fim",
+        requirement("numpy"),
+        requirement("Pillow"),
+    ],
+)
+
+py_binary(
+    name = "simple_resize_example",
+    srcs = ["simple_resize_example.py"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//python:fim",
+        requirement("numpy"),
+        requirement("Pillow"),
+    ],
+)

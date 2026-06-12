@@ -1,0 +1,75 @@
+[build-system]
+requires = ["meson-python>=0.15.0", "ninja", "nanobind>=2.0.0"]
+build-backend = "mesonpy"
+
+[project]
+name = "fimage-python"
+version = "0.1.2"
+description = "Fast Image processing library with lazy evaluation"
+readme = "README.md"
+authors = [
+    {name = "AI for Oncology Research Group", email = "j.teuwen@nki.nl"}
+]
+license = {text = "Apache-2.0"}
+requires-python = ">=3.10"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Healthcare Industry",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: C++",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering :: Image Processing",
+]
+dependencies = [
+    "numpy>=1.20",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-mock",
+]
+
+[project.urls]
+Homepage = "https://github.com/NKI-AI/fimage"
+Repository = "https://github.com/NKI-AI/fimage"
+Issues = "https://github.com/NKI-AI/fimage/issues"
+
+[tool.meson-python.args]
+setup = [
+    "--wrap-mode=forcefallback",
+    # NOTE: do not add --prefer-static. It makes Meson hunt for a static
+    # libpython (libpythonXY.a), which CPython does not ship, breaking the
+    # nanobind Python dependency. Codecs are already static via the
+    # default_library=static wraps below; the extension links libpython's
+    # import library (shared), as required.
+    "-Ddefault_library=static",
+    "-Dbuild_python=true",
+    "-Dbuild_tests=false",
+    # Don't build the fastslide subproject's own gtest suite in the wheel: it is
+    # statically linked for its library only, and its tests add minutes to every
+    # wheel build for no benefit.
+    "-Dfastslide:build_tests=false",
+    # highway resolves `dependency('gtest')` unconditionally (gated only by
+    # test_standalone, NOT by `tests`), so it would configure + build the whole
+    # googletest/gmock subproject even with tests disabled. test_standalone=true
+    # makes highway use its built-in test harness and never touch gtest.
+    "-Dhighway:test_standalone=true",
+]
+# Only install the top-level fimage targets (the _fim extension + the Python
+# package). Subproject wraps declare `install: true` for their static libs /
+# headers, which land in locations with no wheel equivalent, so meson-python
+# aborts ("Could not map installation path ..."). Everything is statically
+# linked into _fim at build time, so skipping subproject installs is correct.
+install = [
+    "--skip-subprojects",
+]
+
+[tool.pytest.ini_options]
+python_files = ["test_*.py", "*_test.py"]

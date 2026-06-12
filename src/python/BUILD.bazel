@@ -1,0 +1,63 @@
+load("@aspect_rules_py//py:defs.bzl", "py_binary", "py_test")
+load("@nanobind_bazel//:build_defs.bzl", "nanobind_extension")
+load("@fimage_pip//:requirements.bzl", "requirement")
+
+# Python bindings extension module for fim.
+# The module name in NB_MODULE(_fim, m) in bindings.cpp determines the actual
+# Python module name. This creates the extension at fim/_fim.so which will be
+# imported via the Python package's __init__.py.
+nanobind_extension(
+    name = "_fim",
+    srcs = [
+        "associated_images_dict.cpp",
+        "bindings.cpp",
+        "deferred_black_canvas.cpp",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//:fimage",
+        "//:python_headers",
+    ],
+)
+
+# Shared test deps. The custom `_pytest_main.py` entrypoint imports pytest
+# directly (so it must be in deps); numpy + pytest-mock are runtime deps of
+# several tests; `//python:fim` is the system under test.
+PYTEST_DEPS = [
+    requirement("pytest"),
+    requirement("pytest-mock"),
+    requirement("numpy"),
+    "//python:fim",
+]
+
+# Each test target uses `_pytest_main.py` as its entrypoint instead of
+# aspect_rules_py's built-in `pytest_main = True`. The built-in expands a
+# `_pytest_paths` rule that drops every external-repo source (`short_path`
+# starts with `../`), which leaves the consumer-side `bazelisk test
+# @fimage//src/python:*` invocation with zero pytest collection roots.
+# See `_pytest_main.py` for the full diagnosis.
+_PYTHON_TESTS = [
+    "checkerboard_integration_test",
+    "fimage_format_test",
+    "operator_paste_test",
+    "operator_resize_test",
+    "python_bindings_api_test",
+    "python_integration_test",
+    "python_stage_validation_test",
+    "sink_spng_test",
+    "multitype_test",
+    "libtiff_context_test",
+]
+
+[
+    py_test(
+        name = test_name,
+        srcs = [
+            "_pytest_main.py",
+            test_name + ".py",
+        ],
+        main = "_pytest_main.py",
+        deps = PYTEST_DEPS,
+    )
+    for test_name in _PYTHON_TESTS
+]

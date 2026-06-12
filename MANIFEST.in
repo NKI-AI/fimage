@@ -1,0 +1,29 @@
+# Include build system files
+include pyproject.toml
+include meson.build
+include meson.options
+
+# Include license and documentation
+include LICENSE
+include README_PUBLIC.md
+
+# Include all source files
+recursive-include src *.cpp *.c
+recursive-include include *.h *.hpp
+
+# Include Python package sources
+recursive-include python *.py *.pyi
+
+# Include subproject wraps for dependency management
+recursive-include subprojects *.wrap
+recursive-include subprojects/packagefiles *
+
+# Exclude build artifacts and caches
+global-exclude *.pyc
+global-exclude *.pyo
+global-exclude __pycache__
+global-exclude *.so
+global-exclude *.dylib
+global-exclude *.dll
+prune builddir
+prune .git

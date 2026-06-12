@@ -1,0 +1,11 @@
+builddir/
+node_modules/
+artifacts/
+
+# Meson subprojects: commit only the wrap files and the vendored packagefiles
+# (meson.build overlays + header shims). Everything else under subprojects/ is
+# either downloaded/extracted dependency sources, the package cache, or local
+# dev symlinks, none of which should be tracked.
+subprojects/*
+!subprojects/*.wrap
+!subprojects/packagefiles/

@@ -1,0 +1,11 @@
+# fastslide (NKI-AI/fastslide, synced from the monorepo). Provides the
+# `fastslide` dependency, exposed via `meson.override_dependency('fastslide',
+# ...)` in fastslide's own meson.build. Only used for the standalone source
+# build (sdist / Windows wheels); in the monorepo fimage builds with Bazel.
+# Revision matches the git_override in MODULE.bazel.
+[wrap-git]
+url = https://github.com/NKI-AI/fastslide.git
+revision = 4849d487b7e8f7dfab740bc1ead5078648246c06
+
+[provide]
+dependency_names = fastslide

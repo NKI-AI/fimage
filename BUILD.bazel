@@ -1,0 +1,681 @@
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("@rules_uv//uv:pip.bzl", "pip_compile")
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files([
+    "LICENSE",
+    "README.md",
+    "requirements.in",
+    "requirements_linux.txt",
+    "requirements_darwin.txt",
+])
+
+# Resolve fimage's runtime/test Python requirements into proper per-platform
+# lockfiles. rules_python's `pip.parse` does not perform transitive resolution
+# itself, so every dep that any wheel imports at runtime must appear in the
+# resolved lockfile. Driving it through `pip_compile` keeps that closed
+# automatically. Tagged `manual` because the lockfile bakes in a path to
+# `requirements.in` that differs between the standalone build and the monorepo
+# `local_path_override` context.
+pip_compile(
+    name = "generate_requirements_linux_txt",
+    python_platform = "x86_64-unknown-linux-gnu",
+    requirements_in = "requirements.in",
+    requirements_txt = "requirements_linux.txt",
+    tags = ["manual"],
+)
+
+pip_compile(
+    name = "generate_requirements_darwin_txt",
+    python_platform = "aarch64-apple-darwin",
+    requirements_in = "requirements.in",
+    requirements_txt = "requirements_darwin.txt",
+    tags = ["manual"],
+)
+
+# ============================================================================
+# Documentation Support
+# ============================================================================
+
+# Export all header files for documentation generation
+filegroup(
+    name = "fimage_headers",
+    srcs = [
+        "include/fim/image.h",
+        "include/fim/operators/crop.h",
+        "include/fim/operators/downsample.h",
+        "include/fim/operators/paste.h",
+        "include/fim/operators/resize.h",
+        "include/fim/operators/resize/kernels.h",
+        "include/fim/operators/resize/resample.h",
+        "include/fim/operators/stack.h",
+        "include/fim/pipeline.h",
+        "include/fim/pixel_type_traits.h",
+        "include/fim/pixel_types.h",
+        "include/fim/python/deferred_black_canvas.h",
+        "include/fim/python/factory.h",
+        "include/fim/python/py_stage.h",
+        "include/fim/python/stage_adapter.h",
+        "include/fim/python/stage_concept.h",
+        "include/fim/python/stage_model.h",
+        "include/fim/sinks/fimage_sink.h",
+        "include/fim/sinks/lodepng_png_sink.h",
+        "include/fim/sinks/memory_sink.h",
+        "include/fim/sinks/spng_sink.h",
+        "include/fim/sinks/tiff_sink.h",
+        "include/fim/sources/associated_image_source.h",
+        "include/fim/sources/black_source.h",
+        "include/fim/sources/fastslide_source.h",
+        "include/fim/sources/fimage_source.h",
+        "include/fim/sources/lodepng_png_source.h",
+        "include/fim/sources/memory_source.h",
+        "include/fim/sources/openslide_source.h",
+        "include/fim/sources/tiff_source.h",
+        "include/fim/types.h",
+        "include/fim/utilities/buffer_pool.h",
+        "include/fim/utilities/compressor.h",
+        "include/fim/utilities/decompressor.h",
+        "include/fim/utilities/tile_helpers.h",
+        "include/fim/utilities/type_helpers.h",
+    ],
+    visibility = ["//docs:__pkg__"],
+)
+
+# Export all source files for documentation generation
+filegroup(
+    name = "fimage_sources",
+    srcs = [
+        "src/sinks/fimage_sink.cpp",
+        "src/sinks/lodepng_png_sink.cpp",
+        "src/sinks/memory_sink.cpp",
+        "src/sinks/spng_sink.cpp",
+        "src/sinks/tiff_sink.cpp",
+        "src/sources/associated_image_source.cpp",
+        "src/sources/black_source.cpp",
+        "src/sources/fastslide_source.cpp",
+        "src/sources/fimage_source.cpp",
+        "src/sources/lodepng_png_source.cpp",
+        "src/sources/memory_source.cpp",
+        "src/sources/openslide_source.cpp",
+        "src/sources/tiff_source.cpp",
+        "src/utilities/compressor.cpp",
+        "src/utilities/decompressor.cpp",
+    ],
+    visibility = ["//docs:__pkg__"],
+)
+
+# ============================================================================
+# Library Targets
+# ============================================================================
+
+# Core types and image abstractions (minimal dependencies)
+cc_library(
+    name = "_core",
+    hdrs = [
+        "include/fim/image.h",
+        "include/fim/pixel_type_traits.h",
+        "include/fim/pixel_types.h",
+        "include/fim/types.h",
+        "include/fim/utilities/debug_flags.h",
+        "include/fim/utilities/layout_utils.h",
+    ],
+    includes = ["include"],
+    visibility = ["//visibility:private"],
+    deps = [
+        "@aifocore-cpp//:thread_pool_singleton",
+    ],
+)
+
+# Compression utilities
+cc_library(
+    name = "_utilities",
+    srcs = [
+        "src/utilities/compressor.cpp",
+        "src/utilities/decompressor.cpp",
+    ],
+    hdrs = [
+        "include/fim/utilities/buffer_pool.h",
+        "include/fim/utilities/compressor.h",
+        "include/fim/utilities/decompressor.h",
+        "include/fim/utilities/layout_utils.h",
+        "include/fim/utilities/tile_helpers.h",
+        "include/fim/utilities/type_helpers.h",
+    ],
+    includes = ["include"],
+    visibility = ["//visibility:private"],
+    deps = [
+        ":_core",
+        "@aifocore-cpp//:result",
+        "@aifocore-cpp//:treiber_stack",
+        "@lz4",
+        "@zstd",
+    ],
+)
+
+# Pipeline orchestration
+cc_library(
+    name = "_pipeline",
+    hdrs = ["include/fim/pipeline.h"],
+    includes = ["include"],
+    visibility = ["//visibility:private"],
+    deps = [":_core"],
+)
+
+# Image operators (crop, paste, resize, etc.)
+cc_library(
+    name = "_operators",
+    srcs = [
+        "src/operators/resize_simd.cpp",
+    ],
+    hdrs = [
+        "include/fim/operators/convert_layout.h",
+        "include/fim/operators/crop.h",
+        "include/fim/operators/downsample.h",
+        "include/fim/operators/paste.h",
+        "include/fim/operators/resize.h",
+        "include/fim/operators/resize/kernels.h",
+        "include/fim/operators/resize/resample.h",
+        "include/fim/operators/stack.h",
+    ],
+    includes = ["include"],
+    visibility = ["//visibility:private"],
+    deps = [
+        ":_core",
+        "@hwy",
+    ],
+)
+
+# Memory and black sources (no external dependencies)
+cc_library(
+    name = "_sources_memory",
+    srcs = [
+        "src/sources/black_source.cpp",
+        "src/sources/memory_source.cpp",
+    ],
+    hdrs = [
+        "include/fim/sources/black_source.h",
+        "include/fim/sources/memory_source.h",
+    ],
+    includes = ["include"],
+    visibility = ["//visibility:private"],
+    deps = [
+        ":_core",
+        ":_pipeline",
+        ":_utilities",
+    ],
+)
+
+# TIFF source
+cc_library(
+    name = "_sources_tiff",
+    srcs = ["src/sources/tiff_source.cpp"],
+    hdrs = ["include/fim/sources/tiff_source.h"],
+    includes = ["include"],
+    visibility = ["//visibility:private"],
+    deps = [
+        ":_core",
+        ":_pipeline",
+        ":_utilities",
+        "@aifocore-cpp//:portability",
+        "@libtiff",
+    ],
+)
+
+# PNG sources (lodepng and spng)
+cc_library(
+    name = "_sources_png",
+    srcs = ["src/sources/lodepng_png_source.cpp"],
+    hdrs = ["include/fim/sources/lodepng_png_source.h"],
+    includes = ["include"],
+    visibility = ["//visibility:private"],
+    deps = [
+        ":_core",
+        ":_pipeline",
+        ":_utilities",
+        "@aifocore-cpp//:portability",
+        "@libspng",
+        "@lodepng",
+    ],
+)
+
+# FastSlide source
+cc_library(
+    name = "_sources_fastslide",
+    srcs = ["src/sources/fastslide_source.cpp"],
+    hdrs = ["include/fim/sources/fastslide_source.h"],
+    includes = ["include"],
+    visibility = ["//visibility:private"],
+    deps = [
+        ":_core",
+        ":_pipeline",
+        "@fastslide//:fastslide_lib",
+    ],
+)
+
+# Associated image sources (for lazy loading associated images)
+cc_library(
+    name = "_sources_associated_images",
+    srcs = ["src/sources/associated_image_source.cpp"],
+    hdrs = ["include/fim/sources/associated_image_source.h"],
+    includes = ["include"],
+    visibility = ["//visibility:private"],
+    deps = [
+        ":_core",
+        ":_pipeline",
+        ":_sources_fastslide",
+    ],
+)
+
+# FImage format source
+cc_library(
+    name = "_sources_fimage",
+    srcs = ["src/sources/fimage_source.cpp"],
+    hdrs = [
+        "include/fim/sinks/fimage_sink.h",  # Cross-dependency needed by header for shared types
+        "include/fim/sources/fimage_source.h",
+    ],
+    includes = ["include"],
+    visibility = ["//visibility:private"],
+    deps = [
+        ":_core",
+        ":_pipeline",
+        ":_utilities",
+    ],
+)
+
+# Memory sink
+cc_library(
+    name = "_sinks_memory",
+    srcs = ["src/sinks/memory_sink.cpp"],
+    hdrs = ["include/fim/sinks/memory_sink.h"],
+    includes = ["include"],
+    visibility = ["//visibility:private"],
+    deps = [
+        ":_core",
+        ":_pipeline",
+    ],
+)
+
+# TIFF sink
+cc_library(
+    name = "_sinks_tiff",
+    srcs = ["src/sinks/tiff_sink.cpp"],
+    hdrs = [
+        "include/fim/sinks/tiff_sink.h",
+        "include/fim/sources/memory_source.h",  # Cross-dependency needed by header
+    ],
+    includes = ["include"],
+    visibility = ["//visibility:private"],
+    deps = [
+        ":_core",
+        ":_operators",
+        ":_pipeline",
+        "@aifocore-cpp//:portability",
+        "@libtiff",
+    ],
+)
+
+# PNG sinks (lodepng and spng)
+cc_library(
+    name = "_sinks_png",
+    srcs = [
+        "src/sinks/lodepng_png_sink.cpp",
+        "src/sinks/spng_sink.cpp",
+    ],
+    hdrs = [
+        "include/fim/sinks/lodepng_png_sink.h",
+        "include/fim/sinks/spng_sink.h",
+    ],
+    includes = ["include"],
+    visibility = ["//visibility:private"],
+    deps = [
+        ":_core",
+        ":_pipeline",
+        "@aifocore-cpp//:portability",
+        "@libspng",
+        "@lodepng",
+    ],
+)
+
+# FImage format sink
+cc_library(
+    name = "_sinks_fimage",
+    srcs = ["src/sinks/fimage_sink.cpp"],
+    hdrs = ["include/fim/sinks/fimage_sink.h"],
+    includes = ["include"],
+    visibility = ["//visibility:private"],
+    deps = [
+        ":_core",
+        ":_pipeline",
+        ":_utilities",
+    ],
+)
+
+# Public fimage library (aggregates all components)
+cc_library(
+    name = "fimage",
+    hdrs = [
+        "include/fim/image.h",
+        "include/fim/operators/convert_layout.h",
+        "include/fim/operators/crop.h",
+        "include/fim/operators/downsample.h",
+        "include/fim/operators/paste.h",
+        "include/fim/operators/resize.h",
+        "include/fim/operators/resize/kernels.h",
+        "include/fim/operators/resize/resample.h",
+        "include/fim/operators/stack.h",
+        "include/fim/pipeline.h",
+        "include/fim/pixel_type_traits.h",
+        "include/fim/pixel_types.h",
+        "include/fim/sinks/fimage_sink.h",
+        "include/fim/sinks/lodepng_png_sink.h",
+        "include/fim/sinks/memory_sink.h",
+        "include/fim/sinks/spng_sink.h",
+        "include/fim/sinks/tiff_sink.h",
+        "include/fim/sources/associated_image_source.h",
+        "include/fim/sources/black_source.h",
+        "include/fim/sources/fastslide_source.h",
+        "include/fim/sources/fimage_source.h",
+        "include/fim/sources/lodepng_png_source.h",
+        "include/fim/sources/memory_source.h",
+        "include/fim/sources/openslide_source.h",
+        "include/fim/sources/tiff_source.h",
+        "include/fim/types.h",
+        "include/fim/utilities/buffer_pool.h",
+        "include/fim/utilities/compressor.h",
+        "include/fim/utilities/debug_flags.h",
+        "include/fim/utilities/decompressor.h",
+        "include/fim/utilities/layout_utils.h",
+        "include/fim/utilities/tile_helpers.h",
+        "include/fim/utilities/type_helpers.h",
+    ],
+    includes = ["include"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":_core",
+        ":_operators",
+        ":_pipeline",
+        ":_sinks_fimage",
+        ":_sinks_memory",
+        ":_sinks_png",
+        ":_sinks_tiff",
+        ":_sources_associated_images",
+        ":_sources_fastslide",
+        ":_sources_fimage",
+        ":_sources_memory",
+        ":_sources_png",
+        ":_sources_tiff",
+        ":_utilities",
+    ],
+)
+
+cc_library(
+    name = "python_headers",
+    hdrs = [
+        "include/fim/python/associated_images_dict.h",
+        "include/fim/python/deferred_black_canvas.h",
+        "include/fim/python/factory.h",
+        "include/fim/python/py_stage.h",
+        "include/fim/python/stage_adapter.h",
+        "include/fim/python/stage_concept.h",
+        "include/fim/python/stage_model.h",
+    ],
+    includes = ["include"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":fimage",
+        "@aifocore-cpp//:portability",
+    ],
+)
+
+# Tests (colocated with implementation in src/)
+cc_test(
+    name = "image_test",
+    srcs = ["src/image_test.cpp"],
+    deps = [
+        ":fimage",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "integration_test",
+    srcs = ["src/integration_test.cpp"],
+    deps = [
+        ":fimage",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "types_test",
+    srcs = ["src/types_test.cpp"],
+    deps = [
+        ":fimage",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "sources_memory_test",
+    srcs = ["src/sources/memory_source_test.cpp"],
+    deps = [
+        ":fimage",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "buffer_pool_test",
+    srcs = ["src/utilities/buffer_pool_test.cpp"],
+    deps = [
+        ":fimage",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "sources_black_test",
+    srcs = ["src/sources/black_source_test.cpp"],
+    deps = [
+        ":fimage",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "png_source_test",
+    srcs = ["src/sources/png_source_test.cpp"],
+    deps = [
+        ":fimage",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "tiff_source_test",
+    srcs = ["src/sources/tiff_source_test.cpp"],
+    deps = [
+        ":fimage",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "fimage_source_test",
+    srcs = ["src/sources/fimage_source_test.cpp"],
+    deps = [
+        ":fimage",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "fimage_sink_test",
+    srcs = ["src/sinks/fimage_sink_test.cpp"],
+    deps = [
+        ":fimage",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "memory_sink_test",
+    srcs = ["src/sinks/memory_sink_test.cpp"],
+    deps = [
+        ":fimage",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "lodepng_sink_test",
+    srcs = ["src/sinks/lodepng_sink_test.cpp"],
+    deps = [
+        ":fimage",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "tiff_sink_test",
+    srcs = ["src/sinks/tiff_sink_test.cpp"],
+    deps = [
+        ":fimage",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "spng_sink_test",
+    srcs = ["src/sinks/spng_sink_test.cpp"],
+    deps = [
+        ":fimage",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "operators_crop_test",
+    srcs = ["src/operators/crop_test.cpp"],
+    deps = [
+        ":fimage",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "operators_paste_test",
+    srcs = ["src/operators/paste_test.cpp"],
+    deps = [
+        ":fimage",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "operators_downsample_test",
+    srcs = ["src/operators/downsample_test.cpp"],
+    deps = [
+        ":fimage",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "operators_ownership_test",
+    srcs = ["src/operators/ownership_test.cpp"],
+    deps = [
+        ":fimage",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "operators_zero_tile_test",
+    srcs = ["src/operators/zero_tile_test.cpp"],
+    deps = [
+        ":fimage",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "operators_resize_test",
+    srcs = ["src/operators/resize_test.cpp"],
+    deps = [
+        ":fimage",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "sinks_move_semantics_test",
+    srcs = ["src/sinks/move_semantics_test.cpp"],
+    deps = [
+        ":fimage",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "fastslide_source_test",
+    srcs = ["src/sources/fastslide_source_test.cpp"],
+    deps = [
+        ":fimage",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "compressor_test",
+    srcs = ["src/utilities/compressor_test.cpp"],
+    deps = [
+        ":fimage",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "decompressor_test",
+    srcs = ["src/utilities/decompressor_test.cpp"],
+    deps = [
+        ":fimage",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "parallel_performance_test",
+    srcs = ["src/parallel_performance_test.cpp"],
+    deps = [
+        ":fimage",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)

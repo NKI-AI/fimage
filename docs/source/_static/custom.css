@@ -1,0 +1,269 @@
+/* Custom CSS for fimage documentation */
+
+/* Enhanced code blocks */
+.highlight {
+  border-radius: 4px;
+  border-left: 4px solid #667eea;
+}
+
+.highlight pre {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 4px;
+}
+
+/* Architecture diagram container */
+.architecture-diagram {
+  text-align: center;
+  margin: 20px 0;
+  padding: 15px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 10px;
+  color: white;
+}
+
+.architecture-diagram h3 {
+  margin: 0;
+  color: white;
+}
+
+/* Inheritance showcase boxes */
+.inheritance-showcase {
+  margin: 20px 0;
+  padding: 15px;
+  background: #f0f4ff;
+  border-left: 4px solid #667eea;
+  border-radius: 4px;
+}
+
+.inheritance-showcase h4 {
+  margin-top: 0;
+  color: #667eea;
+}
+
+/* Doxygen direct links */
+.doxygen-direct-link {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 8px 15px;
+  background: white;
+  color: #667eea;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.doxygen-direct-link:hover {
+  background: #667eea;
+  color: white;
+  text-decoration: none;
+}
+
+/* Format reader grid */
+.format-reader-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin: 20px 0;
+}
+
+.reader-card {
+  padding: 20px;
+  background: #f8f9fa;
+  border-left: 4px solid #764ba2;
+  border-radius: 4px;
+  transition: transform 0.2s ease;
+}
+
+.reader-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.reader-card h4 {
+  margin-top: 0;
+  color: #764ba2;
+}
+
+.reader-card p {
+  margin-bottom: 10px;
+  color: #666;
+}
+
+/* Performance showcase */
+.performance-showcase {
+  text-align: center;
+  margin: 20px 0;
+  padding: 15px;
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  border-radius: 10px;
+  color: white;
+}
+
+.performance-showcase h3 {
+  margin: 0;
+  color: white;
+}
+
+/* Admonition styling */
+.admonition {
+  border-radius: 4px;
+  border-left-width: 4px;
+}
+
+.admonition.note {
+  border-left-color: #667eea;
+  background-color: #f0f4ff;
+}
+
+.admonition.tip {
+  border-left-color: #48bb78;
+  background-color: #f0fff4;
+}
+
+.admonition.warning {
+  border-left-color: #f6ad55;
+  background-color: #fffaf0;
+}
+
+.admonition-title {
+  font-weight: 600;
+}
+
+/* Tables */
+.wy-table-responsive table {
+  border: none;
+}
+
+.wy-table-responsive table td,
+.wy-table-responsive table th {
+  border-color: #e2e8f0;
+}
+
+.wy-table-responsive table thead th {
+  background-color: #667eea;
+  color: white;
+}
+
+.wy-table-responsive table tbody tr:nth-child(even) {
+  background-color: #f7fafc;
+}
+
+/* Code inline */
+code.literal {
+  background-color: #f0f4ff;
+  color: #667eea;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+/* Links */
+a {
+  color: #667eea;
+}
+
+a:hover {
+  color: #764ba2;
+}
+
+/* Navigation */
+.wy-side-nav-search {
+  background-color: #667eea;
+}
+
+.wy-side-nav-search input[type="text"] {
+  border-color: #764ba2;
+}
+
+/* Buttons */
+.btn-neutral {
+  background-color: #667eea !important;
+  color: white !important;
+}
+
+.btn-neutral:hover {
+  background-color: #764ba2 !important;
+}
+
+/* Mermaid diagrams */
+.mermaid {
+  text-align: center;
+  margin: 20px 0;
+}
+
+/* Inheritance diagrams */
+.graphviz {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.graphviz svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Section headers */
+h1,
+h2,
+h3 {
+  color: #2d3748;
+}
+
+h1 {
+  border-bottom: 2px solid #667eea;
+  padding-bottom: 0.3em;
+}
+
+/* Footer */
+.rst-footer-buttons {
+  margin-top: 2rem;
+}
+
+/* Version selector */
+.rst-versions {
+  border-top: 2px solid #667eea;
+}
+
+/* Responsive design */
+@media screen and (max-width: 768px) {
+  .format-reader-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Code block copy button */
+.copybtn {
+  background-color: #667eea;
+  color: white;
+  border-radius: 3px;
+}
+
+.copybtn:hover {
+  background-color: #764ba2;
+}
+
+/* Search results */
+.search li {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.search li:last-child {
+  border-bottom: none;
+}
+
+/* Sidebar */
+.wy-menu-vertical li.current {
+  background: #f0f4ff;
+}
+
+.wy-menu-vertical li.current a {
+  border-right: 2px solid #667eea;
+}
+
+.wy-menu-vertical a:hover {
+  background-color: #f0f4ff;
+}
