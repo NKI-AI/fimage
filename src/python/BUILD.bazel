@@ -1,6 +1,6 @@
 load("@aspect_rules_py//py:defs.bzl", "py_binary", "py_test")
-load("@nanobind_bazel//:build_defs.bzl", "nanobind_extension")
 load("@fimage_pip//:requirements.bzl", "requirement")
+load("@nanobind_bazel//:build_defs.bzl", "nanobind_extension")
 
 # Python bindings extension module for fim.
 # The module name in NB_MODULE(_fim, m) in bindings.cpp determines the actual

@@ -16,11 +16,11 @@
 #include <memory>
 #include <string>
 
+#include "benchmark/benchmark.h"
 #include "fim/image.h"
 #include "fim/operators/resize.h"
 #include "fim/sinks/memory_sink.h"
 #include "fim/sources/memory_source.h"
-#include "benchmark/benchmark.h"
 
 namespace {
 

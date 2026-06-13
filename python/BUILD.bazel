@@ -2,6 +2,7 @@ load("@aspect_rules_py//py:defs.bzl", "py_library")
 load("//tools:versioned_py_wheel.bzl", "multi_version_py_wheel")
 
 FIM_VERSION = "0.1.2"
+
 # Platform-specific compatibility - supports Linux, macOS, and Windows.
 COMPATIBLE_TARGETS = select({
     "@platforms//os:linux": [],

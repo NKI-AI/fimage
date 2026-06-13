@@ -52,6 +52,33 @@ git_override(
     remote = "https://github.com/NKI-AI/fastslide.git",
 )
 
+# fastslide pulls in these off-registry modules. Their git_overrides live in
+# fastslide's MODULE.bazel, but Bazel only honors *_override directives from the
+# root module, so a standalone fimage build (where fimage is root) must repeat
+# them verbatim to resolve fastslide's module graph. Commits are kept in sync
+# with fastslide/MODULE.bazel. In the monorepo these are satisfied by the root's
+# local_path_overrides and the git_overrides here are ignored.
+bazel_dep(name = "simpletiff", version = "0.0.1")
+git_override(
+    module_name = "simpletiff",
+    commit = "38865229481f9a5c00f5a70fc6a2444f3cd3ccfd",
+    remote = "https://github.com/NKI-AI/simpletiff.git",
+)
+
+bazel_dep(name = "jpeg-compressor", version = "0.0.1")
+git_override(
+    module_name = "jpeg-compressor",
+    commit = "927f759d349b7ce2588d50465d719c42011ccb4b",
+    remote = "https://github.com/NKI-AI/jpeg-compressor.git",
+)
+
+bazel_dep(name = "jxrlib", version = "1.1.0")
+git_override(
+    module_name = "jxrlib",
+    commit = "7632349d973656c773f7ecb45325390f463bc92a",
+    remote = "https://github.com/NKI-AI/jxrlib.git",
+)
+
 bazel_dep(name = "nanobind_bazel", version = "2.12.0")
 bazel_dep(name = "rules_python", version = "2.0.0")
 bazel_dep(name = "aspect_rules_py", version = "1.11.5")
