@@ -72,7 +72,11 @@ namespace {
 nb::dict ToPythonPropertiesDict(const ImageProperties& props) {
   nb::dict out;
   for (const auto& [key, value] : props) {
-    std::visit([&](const auto& v) { out[nb::cast(key)] = nb::cast(v); }, value);
+    // Alias the structured binding to a normal local: capturing a structured
+    // binding directly in a lambda is only well-formed since C++20 P1091 and
+    // Apple clang (Xcode 15.4) still rejects it.
+    const auto& key_ref = key;
+    std::visit([&](const auto& v) { out[nb::cast(key_ref)] = nb::cast(v); }, value);
   }
   return out;
 }
